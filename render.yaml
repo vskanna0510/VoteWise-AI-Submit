@@ -1,0 +1,32 @@
+# Render Blueprint: API only. Connect this Git repo in Render → New → Blueprint.
+# Set secret env vars in the Render dashboard (or link to a secret store).
+# After the API URL is live, set the same URL in Vercel → frontend → VITE_API_BASE_URL
+# and backend FRONTEND_URL to your Vercel site origin (https://....vercel.app).
+
+version: "1"
+services:
+  - type: web
+    name: votewise-api
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Replace with your Vercel production URL (no trailing slash), e.g. https://votewise-ai.vercel.app
+      - key: FRONTEND_URL
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GOOGLE_TRANSLATE_API_KEY
+        sync: false
+      - key: GOOGLE_TRANSLATE_REFERER
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
