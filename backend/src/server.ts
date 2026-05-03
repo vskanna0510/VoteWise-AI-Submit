@@ -28,6 +28,15 @@ const isVercelAppBrowserOrigin = (origin: string): boolean => {
 const buildApp = () => {
   const app = express();
 
+  /**
+   * Never do `Number(process.env.TRUST_PROXY ?? 1)` alone — `TRUST_PROXY=""` on some hosts → 0 → trust off.
+   * Default: trust **one** proxy hop (Render, Vercel outbound, etc.).
+   */
+  const tp = String(process.env.TRUST_PROXY ?? '').trim().toLowerCase();
+  const trustProxySetting: boolean | number =
+    tp === 'false' || tp === '0' || tp === 'no' ? false : tp === '' ? 1 : Number.parseInt(tp, 10) || 1;
+  app.set('trust proxy', trustProxySetting);
+
   const allowedProductionOrigins = new Set<string>([
     env.FRONTEND_URL,
     ...env.ADDITIONAL_CORS_ORIGINS,
@@ -97,6 +106,11 @@ if (require.main === module) {
   (async () => {
     try {
       await connectDB();
+      if (process.env.RENDER === 'true' && env.NODE_ENV !== 'production') {
+        logger.warn(
+          'Running on Render with NODE_ENV≠production — set NODE_ENV=production in Render Environment (CORS, rate limits).',
+        );
+      }
       const server = app.listen(env.PORT, () => {
         logger.info(`🗳️  VoteWise AI backend listening on http://localhost:${env.PORT}`);
         logger.info(`Environment: ${env.NODE_ENV}`);

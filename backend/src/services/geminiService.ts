@@ -33,13 +33,11 @@ process-related help. Always cite that information is based on the
 Election Commission of India and the Representation of the People Act.
 `.trim();
 
-const callGeminiReal = async (
-  prompt: string,
-  context: UserContext
-): Promise<string> => {
-  // Placeholder fetch implementation — wires up automatically when the env key exists.
-  // Note: kept minimal to avoid lock-in to a specific SDK.
-  const model = encodeURIComponent(env.GEMINI_MODEL);
+/** Older keys / regions may reject some model IDs with 404; try sensible fallbacks. */
+const GEMINI_MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
+
+const generateWithModelId = async (modelId: string, prompt: string, context: UserContext): Promise<string> => {
+  const model = encodeURIComponent(modelId);
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
   const body = {
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
@@ -70,6 +68,22 @@ const callGeminiReal = async (
   const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
   if (!text) throw new Error('Gemini returned empty response');
   return text;
+};
+
+const callGeminiReal = async (prompt: string, context: UserContext): Promise<string> => {
+  const orderedModels = [...new Set([env.GEMINI_MODEL, ...GEMINI_MODEL_FALLBACKS])];
+  let lastErr: Error | null = null;
+  for (const modelId of orderedModels) {
+    try {
+      return await generateWithModelId(modelId, prompt, context);
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      lastErr = err;
+      if (!/^Gemini HTTP 404\b/.test(err.message)) throw err;
+      logger.warn('Gemini model unavailable, trying fallback', { modelTried: modelId });
+    }
+  }
+  throw lastErr ?? new Error('Gemini failed');
 };
 
 export const askAssistant = async (

@@ -37,17 +37,25 @@ export const env = {
   BCRYPT_SALT_ROUNDS: Number(process.env.BCRYPT_SALT_ROUNDS ?? 12),
 
   GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? '',
-  GEMINI_MODEL: process.env.GEMINI_MODEL ?? 'gemini-1.5-flash',
+  GEMINI_MODEL: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
 
   /** Cloud Translation API v2 — same key type as frontend VITE_GOOGLE_TRANSLATE_API_KEY */
   GOOGLE_TRANSLATE_API_KEY: process.env.GOOGLE_TRANSLATE_API_KEY ?? '',
 
   /**
    * When your Cloud key uses "Website" HTTP referrer restrictions, Google rejects server calls
-   * with an empty referer. We send this Referer header on outbound translate requests —
-   * it MUST match one of your allowed referrers (usually your SPA origin ending in / ).
+   * without a matching Referer. We send Referer from this URL (with trailing slash) on translate requests.
+   * Set this explicitly on Render if keys differ — e.g. https://YOUR_PRODUCTION.vercel.app/
    */
   GOOGLE_TRANSLATE_REFERER: process.env.GOOGLE_TRANSLATE_REFERER ?? '',
+
+  /**
+   * Set true on Render if your Translation key has **no** HTTP-referrer restriction (Application: None).
+   * Google will then not require a matching Referer header — fixes 403 “referer … blocked” for misconfigured keys.
+   */
+  GOOGLE_TRANSLATE_OMIT_REFERRER: ['1', 'true', 'yes'].includes(
+    (process.env.GOOGLE_TRANSLATE_OMIT_REFERRER ?? '').trim().toLowerCase()
+  ),
 
   DEFAULT_ADMIN_EMAIL: process.env.DEFAULT_ADMIN_EMAIL ?? 'admin@votewise.ai',
   DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD ?? 'Admin@123',
