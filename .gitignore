@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Env & secrets — keep tracked: *.example only
+.env
+.env.*
+!.env.example
+!.env*.example
+
+# Logs & debug
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing & coverage
+coverage/
+.nyc_output/
+.vitest/
+
+# Frontend (Vite)
+.vite/
+
+# Turborepo / caches (if added later)
+.turbo/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / editor (workspace-local); commit shared snippets via ! rules if needed
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Deployment hosts (credentials / local config)
+.vercel/
+
+# Certificates & keys
+*.pem
+*.key
+!**/example*.pem

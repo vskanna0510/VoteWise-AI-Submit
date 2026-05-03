@@ -1,7 +1,13 @@
-node_modules
-dist
+# Also see /.gitignore (repo root).
+
+node_modules/
+dist/
+coverage/
+
 .env
-.env.local
+.env.*
+!.env.example
+
 *.log
-coverage
-.vite
+
+.vite/
