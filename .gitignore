@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Accidental copy of node_modules (never commit)
+node_modules_backup_buildtest/
+
 # Build output
 dist/
 build/
