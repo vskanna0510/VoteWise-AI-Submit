@@ -6,6 +6,8 @@ export const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many requests, please try again later.' },
+  /** CORS preflight must not be eaten by 429 without Access-Control-* headers. */
+  skip: (req) => req.method === 'OPTIONS',
 });
 
 export const authLimiter = rateLimit({
@@ -14,6 +16,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many auth attempts, please slow down.' },
+  skip: (req) => req.method === 'OPTIONS',
 });
 
 export const chatLimiter = rateLimit({
@@ -22,4 +25,5 @@ export const chatLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Chat rate limit reached. Wait a moment.' },
+  skip: (req) => req.method === 'OPTIONS',
 });

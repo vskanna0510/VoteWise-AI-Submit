@@ -14,9 +14,9 @@ import routes from './routes';
 const isDevLocalhostOrigin = (origin: string): boolean =>
   /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 
-/** Vercel preview / production deployments use varying *.vercel.app hosts. */
+/** Vercel preview / production deployments — allow team slug in hostname (hyphens + alphanumerics). */
 const isVercelAppOrigin = (origin: string): boolean =>
-  /^https:\/\/(?:[a-z0-9-]+\.)*[a-z0-9-]+\.vercel\.app$/i.test(origin.replace(/\/+$/, ''));
+  /^https:\/\/[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/i.test(origin.replace(/\/+$/, ''));
 
 const buildApp = () => {
   const app = express();

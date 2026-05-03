@@ -30,3 +30,6 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      # Lets any https://*.vercel.app call the API (needed for Vercel preview URLs). Set "false" once you only use a fixed production domain + FRONTEND_URL.
+      - key: ALLOW_VERCEL_PREVIEW_ORIGINS
+        value: "true"
