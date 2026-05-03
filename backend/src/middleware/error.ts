@@ -29,6 +29,16 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
 ): void => {
+  /** express.json / urlencoded body size limit (payload too large) */
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    'type' in err &&
+    (err as { type: string }).type === 'entity.too.large'
+  ) {
+    res.status(413).json({ success: false, error: 'Request body too large' });
+    return;
+  }
   if (err instanceof ZodError) {
     res.status(400).json({
       success: false,

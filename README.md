@@ -247,6 +247,9 @@ cd backend && npm test       # vitest + supertest
 cd frontend && npm test      # vitest + testing-library
 ```
 
+**Backend** ships **contract + regression** coverage alongside health checks: Zod validators (`translateBodySchema`, `chatSchema`), `GET /api` surface, **`entity.too.large` → HTTP 413** for oversized payloads, and Helmet security headers.  
+**Frontend** includes **Accessibility** assertions (e.g. `<nav aria-label>` landmark and controls labelled for screen readers).
+
 ### Manual Smoke Test
 1. Open the landing page → verify hero + animated cards.
 2. Login as `admin@votewise.ai / Admin@123`.
