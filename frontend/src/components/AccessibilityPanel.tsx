@@ -23,6 +23,7 @@ const LANGUAGES: Array<{ id: Language; label: string }> = [
 /** Order mirrors JSX below — translate together when language changes */
 const ACCESSIBILITY_COPY = [
   'Accessibility',
+  'Dismiss backdrop',
   'Close accessibility panel',
   'Accessibility settings',
   'Font size',
@@ -45,6 +46,7 @@ export const AccessibilityPanel = ({ open, onClose }: { open: boolean; onClose: 
 
   const [
     accessibilityTitle,
+    closeBackdropAria,
     closePanelAria,
     dialogAriaLabel,
     fontSectionTitle,
@@ -71,7 +73,7 @@ export const AccessibilityPanel = ({ open, onClose }: { open: boolean; onClose: 
         <>
           <motion.button
             type="button"
-            aria-label={closePanelAria}
+            aria-label={closeBackdropAria}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

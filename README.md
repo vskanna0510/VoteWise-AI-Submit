@@ -247,8 +247,10 @@ cd backend && npm test       # vitest + supertest
 cd frontend && npm test      # vitest + testing-library
 ```
 
-**Backend** ships **contract + regression** coverage alongside health checks: Zod validators (`translateBodySchema`, `chatSchema`), `GET /api` surface, **`entity.too.large` → HTTP 413** for oversized payloads, and Helmet security headers.  
-**Frontend** includes **Accessibility** assertions (e.g. `<nav aria-label>` landmark and controls labelled for screen readers).
+**Backend** ships **contract + regression** coverage alongside health checks: Zod validators (`translateBodySchema`, `chatSchema`, **auth/password rules**, quiz submit), JWT round-trip sanity, **`GET /api`** surface, **`entity.too.large` → HTTP 413** for oversized payloads, and Helmet security headers.  
+**Frontend** includes **Accessibility** assertions (navigation landmark, labelled dialog overlays, labelled controls).
+
+**Continuous integration:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs `npm ci`, `npm test`, and `npm run build` for **both** backend and frontend on push/PR to `main`/`master`.
 
 ### Manual Smoke Test
 1. Open the landing page → verify hero + animated cards.
