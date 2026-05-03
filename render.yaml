@@ -11,7 +11,8 @@ services:
     plan: free
     region: oregon
     rootDir: backend
-    buildCommand: npm install && npm run build
+    # NODE_ENV=production skips devDeps; TS build needs typescript + @types/* .
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
