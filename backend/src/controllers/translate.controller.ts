@@ -75,10 +75,20 @@ export const translateTexts = async (
         } catch {
           /* ignore */
         }
+        const referrerRestrictedKeyWithEmptyReferer =
+          r.status === 403 &&
+          env.GOOGLE_TRANSLATE_OMIT_REFERRER &&
+          (/\b(empty|EMPTY)\b/.test(errBody) ||
+            /<empty>|\\u003cempty\\u003e/i.test(errBody));
+
+        const hint403 = referrerRestrictedKeyWithEmptyReferer
+          ? 'Your API key uses Application restriction → HTTP referrers. Empty Referer (<empty>) is never on that whitelist, so the call fails. Fix: edit the key in Google Cloud → Credentials → set Application restrictions to None, API restrictions → restrict to Cloud Translation API only (recommended for backend). Then keep GOOGLE_TRANSLATE_OMIT_REFERRER=true or false. Alternative: delete OMIT_REFERRER (set false), add https://YOUR_APP.vercel.app/* and https://*.vercel.app/* under Website restrictions, set GOOGLE_TRANSLATE_REFERER=https://YOUR_APP.vercel.app/ to match.'
+          : 'Google blocked this key (often HTTP referrer whitelist). EITHER add your Vercel URLs in GCP (*.vercel.app + production) and leave GOOGLE_TRANSLATE_OMIT_REFERRER unset/false so we send Referer; OR use a backend key with Application restrictions None + API = Cloud Translation only.';
+
         const hint =
           r.status === 403
-            ? 'Google blocked this API key—often HTTP referrer restrictions on the credential. In GCP → Credentials: add https://YOUR_APP.vercel.app/* and https://*.vercel.app/* (or restrict the key only to APIs, not HTTP referrers). If you use an unrestricted/key-only Translation credential, set GOOGLE_TRANSLATE_OMIT_REFERRER=true on Render to stop sending Referer. You can still set GOOGLE_TRANSLATE_REFERER to match a single allowed referrer. Ensure Cloud Translation API is enabled.'
-            : 'Check Render logs for the Google response body; verify GOOGLE_TRANSLATE_API_KEY and Cloud Translation API + billing.';
+            ? hint403
+            : 'Check logs for Google response body; verify GOOGLE_TRANSLATE_API_KEY, Cloud Translation API, and billing.';
         throw new HttpError(
           502,
           googleMessage ?? 'Translation provider returned an error',

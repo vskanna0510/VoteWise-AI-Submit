@@ -50,8 +50,9 @@ export const env = {
   GOOGLE_TRANSLATE_REFERER: process.env.GOOGLE_TRANSLATE_REFERER ?? '',
 
   /**
-   * Set true on Render if your Translation key has **no** HTTP-referrer restriction (Application: None).
-   * Google will then not require a matching Referer header — fixes 403 “referer … blocked” for misconfigured keys.
+   * If true: do **not** send a `Referer` header on Translation requests (Node has no browser referer anyway).
+   * Only works when the key’s **Application restrictions** in GCP are **None**. If Application = "HTTP referrers",
+   * Google treats missing Referer as "<empty>" and rejects with API_KEY_HTTP_REFERRER_BLOCKED.
    */
   GOOGLE_TRANSLATE_OMIT_REFERRER: ['1', 'true', 'yes'].includes(
     (process.env.GOOGLE_TRANSLATE_OMIT_REFERRER ?? '').trim().toLowerCase()
