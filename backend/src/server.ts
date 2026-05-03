@@ -14,8 +14,17 @@ import routes from './routes';
 const isDevLocalhostOrigin = (origin: string): boolean =>
   /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 
+/** Vercel preview / production deployments use varying *.vercel.app hosts. */
+const isVercelAppOrigin = (origin: string): boolean =>
+  /^https:\/\/(?:[a-z0-9-]+\.)*[a-z0-9-]+\.vercel\.app$/i.test(origin.replace(/\/+$/, ''));
+
 const buildApp = () => {
   const app = express();
+
+  const allowedProductionOrigins = new Set<string>([
+    env.FRONTEND_URL,
+    ...env.ADDITIONAL_CORS_ORIGINS,
+  ]);
 
   app.use(helmet());
   app.use(
@@ -25,11 +34,20 @@ const buildApp = () => {
           callback(null, true);
           return;
         }
-        if (origin === env.FRONTEND_URL) {
+        const o = origin.replace(/\/+$/, '');
+        if (allowedProductionOrigins.has(o)) {
           callback(null, true);
           return;
         }
-        if (env.NODE_ENV === 'development' && isDevLocalhostOrigin(origin)) {
+        if (
+          env.ALLOW_VERCEL_PREVIEW_ORIGINS &&
+          env.NODE_ENV === 'production' &&
+          isVercelAppOrigin(o)
+        ) {
+          callback(null, true);
+          return;
+        }
+        if (env.NODE_ENV === 'development' && isDevLocalhostOrigin(o)) {
           callback(null, true);
           return;
         }

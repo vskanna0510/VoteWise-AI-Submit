@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+/** Match browser Origin headers (never include a trailing slash). */
+const normalizeOriginUrl = (v: string): string => v.trim().replace(/\/+$/, '');
+
 const required = (name: string, fallback?: string): string => {
   const v = process.env[name] ?? fallback;
   if (!v) throw new Error(`Missing required env: ${name}`);
@@ -10,7 +13,22 @@ const required = (name: string, fallback?: string): string => {
 export const env = {
   PORT: Number(process.env.PORT ?? 5000),
   NODE_ENV: process.env.NODE_ENV ?? 'development',
-  FRONTEND_URL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+
+  FRONTEND_URL: normalizeOriginUrl(process.env.FRONTEND_URL ?? 'http://localhost:5173'),
+
+  /** Extra allowed CORS origins (comma-separated). Use for alternate Vercel preview URLs etc. */
+  ADDITIONAL_CORS_ORIGINS: (process.env.ADDITIONAL_CORS_ORIGINS ?? '')
+    .split(',')
+    .map((o) => normalizeOriginUrl(o))
+    .filter(Boolean),
+
+  /**
+   * If true: allow https://*.vercel.app origins (covers preview deploys whose URL differs from production).
+   * Safer alternative: leave false and list exact URLs in ADDITIONAL_CORS_ORIGINS.
+   */
+  ALLOW_VERCEL_PREVIEW_ORIGINS: ['1', 'true', 'yes'].includes(
+    (process.env.ALLOW_VERCEL_PREVIEW_ORIGINS ?? '').toLowerCase()
+  ),
 
   MONGO_URI: required('MONGO_URI', 'mongodb://localhost:27017/votewise_ai'),
 
