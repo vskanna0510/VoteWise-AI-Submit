@@ -10,6 +10,20 @@ import { env } from '../config/env';
 
 const router = Router();
 
+/** GET /api — many people try the API base URL on Render. */
+router.get('/', (_req, res) => {
+  res.json({
+    success: true,
+    service: 'votewise-ai-api',
+    message: 'API is up. Use routes under this path.',
+    health: '/api/health',
+    auth: '/api/auth',
+    quiz: '/api/quiz',
+    translate: '/api/translate',
+    chat: '/api/chat',
+  });
+});
+
 router.get('/health', (_req, res) => {
   res.json({
     success: true,

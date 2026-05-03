@@ -43,6 +43,17 @@ const buildApp = () => {
   if (env.NODE_ENV !== 'test') app.use(morgan('dev'));
   app.use(generalLimiter);
 
+  /** Render / health checks sometimes hit `/` — avoid a bare "Not Found". */
+  app.get('/', (_req, res) => {
+    res.json({
+      success: true,
+      service: 'votewise-ai-api',
+      message: 'VoteWise AI backend. All HTTP routes live under /api.',
+      health: '/api/health',
+      example: '/api/health',
+    });
+  });
+
   app.use('/api', routes);
 
   app.use(notFound);

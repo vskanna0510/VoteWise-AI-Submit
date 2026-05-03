@@ -12,8 +12,14 @@ export class HttpError extends Error {
   }
 }
 
-export const notFound = (_req: Request, res: Response): void => {
-  res.status(404).json({ success: false, error: 'Resource not found' });
+export const notFound = (req: Request, res: Response): void => {
+  res.status(404).json({
+    success: false,
+    error: 'Resource not found',
+    path: req.originalUrl,
+    method: req.method,
+    hint: 'VoteWise routes are under /api. Try GET /api or GET /api/health. The web UI is served from Vercel, not Render.',
+  });
 };
 
 export const errorHandler = (
