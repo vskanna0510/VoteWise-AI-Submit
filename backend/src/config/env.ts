@@ -27,7 +27,7 @@ export const env = {
    * Safer alternative: leave false and list exact URLs in ADDITIONAL_CORS_ORIGINS.
    */
   ALLOW_VERCEL_PREVIEW_ORIGINS: ['1', 'true', 'yes'].includes(
-    (process.env.ALLOW_VERCEL_PREVIEW_ORIGINS ?? '').toLowerCase()
+    (process.env.ALLOW_VERCEL_PREVIEW_ORIGINS ?? '').trim().toLowerCase()
   ),
 
   MONGO_URI: required('MONGO_URI', 'mongodb://localhost:27017/votewise_ai'),
@@ -53,3 +53,13 @@ export const env = {
   DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD ?? 'Admin@123',
   DEFAULT_ADMIN_NAME: process.env.DEFAULT_ADMIN_NAME ?? 'Election Admin',
 } as const;
+
+/** True if env.FRONTEND_URL host is a Vercel app host (production or preview family). */
+export const frontendHostnameIsVercelApp = (): boolean => {
+  try {
+    const h = new URL(env.FRONTEND_URL).hostname.toLowerCase();
+    return h.endsWith('.vercel.app') && h !== 'vercel.app';
+  } catch {
+    return false;
+  }
+};

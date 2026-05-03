@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import { env } from './config/env';
+import { env, frontendHostnameIsVercelApp } from './config/env';
 import { connectDB } from './config/db';
 import { logger } from './utils/logger';
 import { generalLimiter } from './middleware/rateLimit';
@@ -14,9 +14,16 @@ import routes from './routes';
 const isDevLocalhostOrigin = (origin: string): boolean =>
   /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 
-/** Vercel preview / production deployments — allow team slug in hostname (hyphens + alphanumerics). */
-const isVercelAppOrigin = (origin: string): boolean =>
-  /^https:\/\/[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/i.test(origin.replace(/\/+$/, ''));
+/** Browser Origin is any https deployment on *.vercel.app (preview or production hostname). */
+const isVercelAppBrowserOrigin = (origin: string): boolean => {
+  try {
+    const u = new URL(origin);
+    const h = u.hostname.toLowerCase();
+    return u.protocol === 'https:' && h.endsWith('.vercel.app') && h !== 'vercel.app';
+  } catch {
+    return false;
+  }
+};
 
 const buildApp = () => {
   const app = express();
@@ -26,7 +33,15 @@ const buildApp = () => {
     ...env.ADDITIONAL_CORS_ORIGINS,
   ]);
 
-  app.use(helmet());
+  /** Preview URLs differ from production; allow whole Vercel family when configured or when primary UI is on Vercel. */
+  const allowVercelDeploymentOrigins =
+    env.ALLOW_VERCEL_PREVIEW_ORIGINS || frontendHostnameIsVercelApp();
+
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(
     cors({
       origin: (origin, callback) => {
@@ -39,11 +54,7 @@ const buildApp = () => {
           callback(null, true);
           return;
         }
-        if (
-          env.ALLOW_VERCEL_PREVIEW_ORIGINS &&
-          env.NODE_ENV === 'production' &&
-          isVercelAppOrigin(o)
-        ) {
+        if (allowVercelDeploymentOrigins && isVercelAppBrowserOrigin(o)) {
           callback(null, true);
           return;
         }
