@@ -36,9 +36,12 @@ Election Commission of India and the Representation of the People Act.
 /** Older keys / regions may reject some model IDs with 404; try sensible fallbacks. */
 const GEMINI_MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
 
+const getGeminiApiKey = (): string => (process.env.GEMINI_API_KEY ?? '').trim();
+
 const generateWithModelId = async (modelId: string, prompt: string, context: UserContext): Promise<string> => {
+  const key = getGeminiApiKey();
   const model = encodeURIComponent(modelId);
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
   const body = {
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [
@@ -106,7 +109,7 @@ export const askAssistant = async (
     };
   }
 
-  if (env.GEMINI_API_KEY) {
+  if (getGeminiApiKey()) {
     try {
       const text = await callGeminiReal(prompt, context);
       return {
